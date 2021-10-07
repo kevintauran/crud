@@ -20,6 +20,8 @@ class App extends Component {
       },
     ],
     modalOpen: false,
+    modalDel: false,
+    indexDel: -1,
     dataAdd: {
       username: "",
       password: "",
@@ -39,16 +41,25 @@ class App extends Component {
     let usersNew = this.state.users;
     usersNew.push(this.state.dataAdd);
 
-    let defaultAddData = {
+    let defaultDataAdd = {
       username: "",
       password: "",
       email: "",
       role: "",
     };
+    this.setState({
+      users: usersNew,
+      dataAdd: defaultDataAdd,
+      modalOpen: false,
+    });
   };
 
   toggleModalHandler = () => {
     this.setState({ modalOpen: !this.state.modalOpen });
+  };
+
+  toggleModalDelHandler = () => {
+    this.setState({ modalDel: !this.state.modalDel });
   };
 
   onAddInputHandler = (e) => {
@@ -57,17 +68,33 @@ class App extends Component {
     this.setState({ dataAdd: dataAddMute });
   };
 
+  onDeleteClick = (index) => {
+    this.setState({ indexDel: index, modalDel: !this.state.modalDel });
+  };
+
+  onconfirmdeleteclick = () => {
+    const { indexDel, users } = this.state;
+    let usersNew = users;
+    usersNew.splice(indexDel, 1);
+
+    this.setState({
+      users: usersNew,
+      indexDel: -1,
+      modalDel: !this.state.modalDel,
+    });
+  };
+
   renderListData = () => {
     return this.state.users.map((val, index) => {
       return (
-        <tr key={index}>
+        <tr key={index} onDeleteClick={this.onDeleteClick}>
           <td>{index + 1}</td>
           <td>{val.username}</td>
           <td>{val.password}</td>
           <td>{val.email}</td>
           <td>{val.role}</td>
           <td>
-            <button>Delete</button>
+            <button onClick={() => this.onDeleteClick(index)}>Delete</button>
             <button>Edit</button>
             <button onClick={this.toggleModalHandler}>Add Data</button>
           </td>
@@ -77,21 +104,67 @@ class App extends Component {
   };
 
   render() {
+    const { users, indexDel, modalDel } = this.state;
     return (
       <div className="px 5">
+        {/*  modal add */}
         <Modal isOpen={this.state.modalOpen} toggle={this.toggleModalHandler}>
-          <ModalHeader toggle={this.toggleModalHandler}>Modal title</ModalHeader>
+          <ModalHeader toggle={this.toggleModalHandler}>Add user</ModalHeader>
           <ModalBody>
-            <input type="text" name="username" className="form-control" placeholder="username" onChange={this.onAddInputHandler} value={this.state.dataAdd.username} />
-            <input type="text" name="password" className="form-control" placeholder="password" value={this.state.dataAdd.password} onChange={this.onAddInputHandler} />
-            <input type="text" name="email" className="form-control" placeholder="email" value={this.state.dataAdd.email} onChange={this.onAddInputHandler} />
-            <input type="text" name="role" className="form-control" placeholder="role" value={this.state.dataAdd.role} onChange={this.onAddInputHandler} />
+            <input
+              type="text"
+              name="username"
+              className="form-control"
+              placeholder="username"
+              onChange={this.onAddInputHandler}
+              value={this.state.dataAdd.username}
+            />
+            <input
+              type="text"
+              name="password"
+              className="form-control"
+              placeholder="password"
+              value={this.state.dataAdd.password}
+              onChange={this.onAddInputHandler}
+            />
+            <input
+              type="text"
+              name="email"
+              className="form-control"
+              placeholder="email"
+              value={this.state.dataAdd.email}
+              onChange={this.onAddInputHandler}
+            />
+            <input
+              type="text"
+              name="role"
+              className="form-control"
+              placeholder="role"
+              value={this.state.dataAdd.role}
+              onChange={this.onAddInputHandler}
+            />
           </ModalBody>
           <ModalFooter>
             <button onClick={this.onAddDataClick}>Save</button>
             <button onClick={this.toggleModalHandler}>Cancel</button>
           </ModalFooter>
         </Modal>
+        {/* modal add finished */}
+
+        {/* modal del */}
+        <Modal isOpen={modalDel} toggle={this.toggleModalHandler}>
+          <ModalHeader toggle={this.toggleModalDelHandler}>
+            Delete user
+          </ModalHeader>
+          <ModalBody>
+            yakin hapus user {indexDel < 0 ? "" : users[indexDel].username}?
+          </ModalBody>
+          <ModalFooter>
+            <button onClick={this.onconfirmdeleteclick}>Yes</button>
+            <button onClick={this.toggleModalDelHandler}>Cancel</button>
+          </ModalFooter>
+        </Modal>
+        {/* modal del finished */}
         <Table dark>
           <thead>
             <tr>
