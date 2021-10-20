@@ -28,6 +28,14 @@ class App extends Component {
       email: "",
       role: "",
     },
+    modalEdit: false,
+    indexEdit: -1,
+    dataEdit: {
+      username: "",
+      password: "",
+      email: "",
+      role: "",
+    },
   };
 
   onAddDataClick = () => {
@@ -58,6 +66,10 @@ class App extends Component {
     this.setState({ modalOpen: !this.state.modalOpen });
   };
 
+  toggleModalEditHandler = () => {
+    this.setState({ modalEdit: !this.state.modalEdit });
+  };
+
   toggleModalDelHandler = () => {
     this.setState({ modalDel: !this.state.modalDel });
   };
@@ -68,8 +80,48 @@ class App extends Component {
     this.setState({ dataAdd: dataAddMute });
   };
 
+  onEditInputHandler = (e) => {
+    let dataEditMutate = this.state.dataEdit;
+    dataEditMutate = { ...dataEditMutate, [e.target.name]: e.target.value };
+    this.setState({ dataEdit: dataEditMutate });
+  };
+
+  onSaveEditClick = () => {
+    let { username, password, email, role } = this.state.dataEdit;
+
+    if (!username || !password || !email || !role) {
+      alert("tolong lengkapi");
+      return;
+    }
+    let { indexEdit, users, dataEdit } = this.state;
+    let usersNew = users;
+    usersNew.splice(indexEdit, 1, dataEdit);
+
+    let defaultEditData = {
+      username: "",
+      password: "",
+      email: "",
+      role: "",
+    };
+    this.setState({
+      users: usersNew,
+      dataEdit: defaultEditData,
+      modalEdit: false,
+    });
+  };
+
   onDeleteClick = (index) => {
     this.setState({ indexDel: index, modalDel: !this.state.modalDel });
+  };
+
+  onEditClick = (index) => {
+    let newEditData = this.state.users[index];
+
+    this.setState({
+      indexEdit: index,
+      modalEdit: !this.state.modalEdit,
+      dataEdit: newEditData,
+    });
   };
 
   onconfirmdeleteclick = () => {
@@ -95,12 +147,66 @@ class App extends Component {
           <td>{val.role}</td>
           <td>
             <button onClick={() => this.onDeleteClick(index)}>Delete</button>
-            <button>Edit</button>
+            <button onClick={() => this.onEditClick(index)}>Edit</button>
             <button onClick={this.toggleModalHandler}>Add Data</button>
           </td>
         </tr>
       );
     });
+  };
+
+  renderModalEdit = () => {
+    let { indexEdit, dataEdit, modalEdit, users } = this.state;
+    if (indexEdit < 0) {
+      return;
+    }
+    return (
+      <div className="px 5">
+        <Modal isOpen={modalEdit} toggle={this.toggleModalEditHandler}>
+          <ModalHeader toggle={this.toggleModalEditHandler}>
+            Edit user {users.username}
+          </ModalHeader>
+          <ModalBody>
+            <input
+              type="text"
+              name="username"
+              className="form-control"
+              placeholder="username"
+              onChange={this.onEditInputHandler}
+              value={dataEdit.username}
+            />
+            <input
+              type="text"
+              name="password"
+              className="form-control"
+              placeholder="password"
+              value={dataEdit.password}
+              onChange={this.onEditInputHandler}
+            />
+            <input
+              type="text"
+              name="email"
+              className="form-control"
+              placeholder="email"
+              value={dataEdit.email}
+              onChange={this.onEditInputHandler}
+            />
+            <input
+              type="text"
+              name="role"
+              className="form-control"
+              placeholder="role"
+              value={dataEdit.role}
+              onChange={this.onEditInputHandler}
+            />
+          </ModalBody>
+          <ModalFooter>
+            <button onClick={this.onSaveEditClick}>Save</button>
+            <button onClick={this.toggleModalEditHandler}>Cancel</button>
+          </ModalFooter>
+        </Modal>
+      </div>
+    );
   };
 
   render() {
@@ -165,6 +271,7 @@ class App extends Component {
           </ModalFooter>
         </Modal>
         {/* modal del finished */}
+        {this.renderModalEdit()}
         <Table dark>
           <thead>
             <tr>
